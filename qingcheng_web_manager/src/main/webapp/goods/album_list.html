@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>album管理</title>
+    <title>相册图片列表</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- 引入样式 -->
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
@@ -36,6 +36,8 @@
         }
 
     </style>
+
+
 </head>
 <body class="hold-transition">
 <div id="app">
@@ -52,39 +54,23 @@
     <div class="app-container">
         <div class="box">
             <div class="filter-container">
-                <!--查询表单-->
-                <el-form :inline="true" >
-                          <el-form-item label="相册名称">
-                              <el-input v-model="searchMap.title" placeholder="相册名称" class="filter-item" ></el-input>
-                          </el-form-item>
-                        <el-button class="dalfBut" @click="fetchData()">查询</el-button>
-                <el-button type="primary"  class="butT" @click="formVisible=true;pojo={}">新增</el-button>
-                </el-form>
+                <el-button type="primary"  class="butT" @click="formVisible=true">新增</el-button>
+                <el-button type="primary"  class="butT" @click="location='album.html'">返回</el-button>
             </div>
 
-            <el-table :data="tableData" border style="width: 100%">
-                          <el-table-column prop="id" label="编号" width="80"></el-table-column>
-          <el-table-column prop="title" label="相册名称" width="80"></el-table-column>
-          <el-table-column label="相册封面" width="150">
-              <template slot-scope="scope">
-                  <img :src="scope.row.image" width="100px" height="100px">
-              </template>
-          </el-table-column>
-                   <el-table-column
-                            label="操作"  >
-                        <template slot-scope="scope">
-                            <el-button @click="edit(scope.row.id)" size="mini" type="primary" size="small">修改</el-button>
-                            <el-button @click="dele(scope.row.id)" size="mini" type="danger" size="small">删除</el-button>
-                        </template>
-                    </el-table-column>
-                    <el-table-column
-                            label="设置"  >
-                        <template slot-scope="scope">
-                            <el-button @click="list(scope.row.id)" size="mini" type="primary" size="small">图片列表</el-button>
-                        </template>
-                    </el-table-column>
+            <el-row>
+                <el-col :span="4" v-for="(item,index) in imageList" :key="o" >
+                    <el-card :body-style="{ padding: '0px' }">
+                        <img :src="item.url" class="image" width="200px" height="200px">
+                        <div style="padding: 14px;">
+                            <div class="bottom clearfix">
+                                <el-button @click="dele(item.url)" size="mini" type="danger" size="small">删除</el-button>
+                            </div>
+                        </div>
+                    </el-card>
+                </el-col>
+            </el-row>
 
-            </el-table>
             <div class="pagination-container">
                 <el-pagination
                         class="pagiantion"
@@ -101,7 +87,6 @@
                 <!--弹出窗口-->
                 <el-dialog  title="编辑" :visible.sync="formVisible" >
                     <el-form label-width="80px">
-                            <el-form-item label="相册名称"><el-input v-model="pojo.title"></el-input></el-form-item>
                             <el-form-item label="图片">
                                 <el-upload
                                         class="avatar-uploader"
@@ -124,12 +109,12 @@
         </div>
     </div>
 
-
 </div>
 </body>
 <script src="/js/vue.js"></script>
 <script src="/js/axios.js"></script>
 <script src="/js/elementui.js"></script>
+<script src="/js/util.js"></script>
 <script>
      new Vue({
         el: '#app',
@@ -142,23 +127,26 @@
                 searchMap: {},
                 pojo: {},
                 formVisible: false,
-                imageUrl: ''
+                imageUrl: '',
+                imageList:[]
             }
         },
         created(){
-            this.fetchData();
+            let id=getQueryString("id");
+            this.fetchData(id);
         },
         methods:{
-            fetchData (){
-                axios.post(`/album/findPage.do?page=${this.currentPage}&size=${this.size}`,this.searchMap).then(response => {
-                    this.tableData = response.data.rows;
-                    this.total = response.data.total;
-                });
+            fetchData (id){
+                // 调用查询
+                axios.get(`/album/findById.do?id=${id}`).then(response => {
+                    this.pojo=response.data;
+                    this.imageList = JSON.parse( this.pojo.imageItems);
+                })
             },
             save (){
-                 this.pojo.image= this.imageUrl; //如页面有图片上传功能放开注释
-                axios.post(`/album/${this.pojo.id==null?'add':'update'}.do`,this.pojo).then(response => {
-                    this.fetchData (); //刷新列表
+                this.imageList.push({url:this.imageUrl});  //追加
+                this.pojo.imageItems= JSON.stringify(this.imageList); //保存到实体
+                axios.post(`/album/update.do`,this.pojo).then(response => {  //保存到数据库
                     this.formVisible = false ;//关闭窗口
                 });
             },
@@ -166,22 +154,30 @@
                 this.formVisible = true // 打开窗口
                 // 调用查询
                 axios.get(`/album/findById.do?id=${id}`).then(response => {
-                    this.pojo = response.data;
-                    this.imageUrl=this.pojo.image //显示图片  如页面有图片上传功能放开注释
+                    this.imageList = JSON.parse( response.data.imageItems);
                 })
             },
             list (id){  //图片列表
                 location.href=`album_list.html?id=${id}`;
             },
-            dele (id){
+            dele (url){
                 this.$confirm('确定要删除此记录吗?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then( () => {
-                    axios.get(`/album/delete.do?id=${id}`).then(response => {
-                        this.fetchData (); //刷新列表
-                    })
+
+                    for(let i=0;i<this.imageList.length;i++){
+                        if(this.imageList[i].url==url){
+                            this.imageList.splice(i,1);
+                            break;
+                        }
+                    }
+                    this.pojo.imageItems= JSON.stringify(this.imageList); //保存到实体
+                    axios.post(`/album/update.do`,this.pojo).then(response => {  //保存到数据库
+                        this.formVisible = false ;//关闭窗口
+                    });
+
                 })
             },
 			//* ****图片上传相关代码  如页面有图片上传功能放开注释 ****

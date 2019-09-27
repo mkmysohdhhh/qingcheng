@@ -1,5 +1,7 @@
 package com.qingcheng.service.goods;
+
 import com.qingcheng.entity.PageResult;
+import com.qingcheng.pojo.goods.Goods;
 import com.qingcheng.pojo.goods.Spu;
 
 import java.util.*;
@@ -16,10 +18,10 @@ public interface SpuService {
     public PageResult<Spu> findPage(int page, int size);
 
 
-    public List<Spu> findList(Map<String,Object> searchMap);
+    public List<Spu> findList(Map<String, Object> searchMap);
 
 
-    public PageResult<Spu> findPage(Map<String,Object> searchMap,int page, int size);
+    public PageResult<Spu> findPage(Map<String, Object> searchMap, int page, int size);
 
 
     public Spu findById(String id);
@@ -32,4 +34,21 @@ public interface SpuService {
 
     public void delete(String id);
 
+    public void saveGoods(Goods goods);
+
+    public Goods findGoodsById(String id);
+
+    public void audit(String id, String status, String message);
+
+    public void pull(String id);
+
+    public void put(String id);
+
+    public void putMany(Long[] ids);
+
+    public void pullMany(Long[] ids);
+
+    void dele(String id);
+
+    void notdele(String id);
 }
