@@ -96,6 +96,24 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     /**
+     * 根据OrderID查询
+     * @param id
+     * @return
+     */
+/*    @Override
+    public OrderItem findByOrderId(String id) {
+        Example example = new Example(OrderItem.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("orderId",id);
+        OrderItem orderItem = orderItemMapper.selectOneByExample(example);
+        if (orderItem!=null) {
+            return orderItem;
+        } else {
+            throw new RuntimeException("没找到订单详情");
+        }
+    }*/
+
+    /**
      * 构建查询条件
      * @param searchMap
      * @return
