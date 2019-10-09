@@ -27,6 +27,11 @@
 				</bean>
 			</array>
 		</property>
+		<property name="configuration">
+			<bean class="org.apache.ibatis.session.Configuration">
+				<property name="mapUnderscoreToCamelCase" value="true"></property>
+			</bean>
+		</property>
 	</bean>
 	<bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
 		<property name="basePackage" value="com.qingcheng.dao" />

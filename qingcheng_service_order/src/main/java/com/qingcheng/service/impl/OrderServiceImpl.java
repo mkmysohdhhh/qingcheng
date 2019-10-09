@@ -7,6 +7,7 @@ import com.qingcheng.dao.*;
 import com.qingcheng.entity.PageResult;
 import com.qingcheng.pojo.order.*;
 import com.qingcheng.service.order.OrderService;
+import com.qingcheng.util.IdWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
@@ -37,6 +38,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderLogMapper orderLogMapper;
 
+    @Autowired
+    private IdWorker idWorker;
     /**
      * 返回全部记录
      *
@@ -209,6 +212,7 @@ public class OrderServiceImpl implements OrderService {
 
                 //记录日志
                 OrderLog orderLog = new OrderLog();
+                orderLog.setId(idWorker.nextId()+"");
                 orderLog.setOperater("system");
                 orderLog.setOperateTime(new Date());
                 orderLog.setOrderStatus("4");

@@ -1,6 +1,7 @@
 package com.qingcheng.controller.order;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.qingcheng.service.order.CategoryReportService;
 import com.qingcheng.service.order.OrderService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -11,11 +12,19 @@ import java.util.Date;
 public class OrderTask {
 
     @Reference
+    private CategoryReportService categoryReportService;
+    @Reference
     private OrderService orderService;
 
-   @Scheduled(cron ="0 0/2 * * * ?")
-    public void orderTimeOutLogic(){
-       System.out.println("每两分钟执行一次超时清理"+new Date());
-       orderService.orderTimeOutLogic();
+    @Scheduled(cron = "0 0/2 * * * ?")
+    public void orderTimeOutLogic() {
+        System.out.println("每两分钟执行一次超时清理" + new Date());
+        orderService.orderTimeOutLogic();
+    }
+
+    @Scheduled(cron = "0 0 2 * * ?")
+    public void createDate() {
+        System.out.println("定时统计销售额");
+        categoryReportService.createData();
     }
 }
